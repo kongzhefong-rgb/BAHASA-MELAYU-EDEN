@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>马语趣味学习乐园</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=ZCOOL+Happy&display=swap');
+
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --bg: #F7FFF7;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2c3e50;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 1120px; /* 16:9 based on height */
+            aspect-ratio: 16 / 9;
+            background-color: var(--bg);
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+            padding: 20px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-main {
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.2s;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #d64545;
+            margin: 10px;
+            text-align: center;
+        }
+
+        .btn-main:hover {
+            transform: scale(1.05);
+            background-color: #ff5252;
+        }
+
+        .btn-main:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 transparent;
+        }
+
+        .topic-card {
+            background: white;
+            border: 4px solid var(--secondary);
+            border-radius: 20px;
+            padding: 20px;
+            width: 200px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .topic-card:hover {
+            transform: rotate(-2deg) scale(1.05);
+            border-color: var(--primary);
+        }
+
+        .game-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.8);
+            position: absolute;
+            top: 0;
+            z-index: 10;
+        }
+
+        .quiz-option {
+            background: white;
+            border: 2px solid #ddd;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 8px;
+            width: 100%;
+            max-width: 400px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--secondary);
+            background-color: #f0ffff;
+        }
+
+        .correct { background-color: #a7ffeb !important; border-color: #00bfa5 !important; }
+        .wrong { background-color: #ffcdd2 !important; border-color: #d32f2f !important; }
+
+        .image-box {
+            background: #fff;
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            min-width: 150px;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+        }
+
+        #music-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <!-- 背景音乐控制 -->
+    <div id="music-toggle" onclick="toggleMusic()">🎵</div>
+
+    <!-- 顶部栏 -->
+    <div class="game-header" id="header" style="display:none">
+        <button onclick="showMenu()" class="text-sm bg-gray-200 px-3 py-1 rounded">🏠 返回主菜单</button>
+        <div id="progress-text" class="font-bold text-gray-700"></div>
+        <div id="score-text" class="text-orange-500 font-bold">分数: 0</div>
+    </div>
+
+    <!-- 1. 主菜单 -->
+    <div id="screen-menu" class="screen active">
+        <h1 class="text-4xl font-bold mb-8 text-red-500">🇲🇾 马语趣味学习乐园</h1>
+        <div class="grid grid-cols-2 gap-6">
+            <div class="topic-card" onclick="startTopic(1)">
+                <div class="text-4xl mb-2">🏫</div>
+                <div class="font-bold">单元 1</div>
+                <div class="text-xs text-gray-500">第一天开学</div>
+            </div>
+            <div class="topic-card" onclick="startTopic(2)">
+                <div class="text-4xl mb-2">👫</div>
+                <div class="font-bold">单元 2</div>
+                <div class="text-xs text-gray-500">我的学校朋友</div>
+            </div>
+            <div class="topic-card" onclick="startTopic(3)">
+                <div class="text-4xl mb-2">🏠</div>
+                <div class="font-bold">单元 3</div>
+                <div class="text-xs text-gray-500">我的家庭</div>
+            </div>
+            <div class="topic-card" onclick="startTopic(4)">
+                <div class="text-4xl mb-2">📚</div>
+                <div class="font-bold">单元 4</div>
+                <div class="text-xs text-gray-500">我的教室</div>
+            </div>
+        </div>
+        <p class="mt-8 text-gray-400 text-sm italic">准备好了吗？点击一个单元开始学习！</p>
+    </div>
+
+    <!-- 2. 游戏容器 -->
+    <div id="screen-game" class="screen">
+        <div id="game-content" class="w-full flex flex-col items-center">
+            <!-- 游戏动态内容将插入这里 -->
+        </div>
+    </div>
+
+    <!-- 3. 结算界面 -->
+    <div id="screen-result" class="screen">
+        <div class="text-6xl mb-4">🎉</div>
+        <h2 class="text-3xl font-bold mb-2">太棒了！</h2>
+        <p id="result-message" class="text-xl mb-6 text-gray-600"></p>
+        <button onclick="showMenu()" class="btn-main">返回主菜单</button>
+    </div>
+</div>
+
+<script>
+    // --- 游戏数据定义 ---
+    const gameData = {
+        1: [
+            {
+                type: 'chat',
+                title: '社交礼仪',
+                questions: [
+                    { q: 'Selamat pagi', options: ['Selamat pagi', 'Selamat malam'], a: 0, hint: '早上好' },
+                    { q: 'Apa nama kamu?', options: ['Nama saya Eden', 'Saya lapar'], a: 0, hint: '你叫什么名字？' },
+                    { q: 'Apa khabar?', options: ['Saya baik', 'Sama-sama'], a: 0, hint: '你好吗？' },
+                    { q: 'Jumpa lagi', options: ['Terima kasih', 'Jumpa lagi'], a: 1, hint: '再见' }
+                ]
+            },
+            {
+                type: 'color',
+                title: '认识颜色',
+                questions: [
+                    { q: 'Merah', color: '#FF0000', options: ['红色', '蓝色'], a: 0 },
+                    { q: 'Kuning', color: '#FFFF00', options: ['绿色', '黄色'], a: 1 },
+                    { q: 'Biru', color: '#0000FF', options: ['蓝色', '紫色'], a: 0 },
+                    { q: 'Oren', color: '#FFA500', options: ['橙色', '黑色'], a: 0 },
+                    { q: 'Hijau', color: '#00FF00', options: ['白色', '绿色'], a: 1 },
+                    { q: 'Ungu', color: '#800080', options: ['紫色', '粉色'], a: 0 },
+                    { q: 'Hitam', color: '#000000', options: ['灰色', '黑色'], a: 1 },
+                    { q: 'Putih', color: '#FFFFFF', options: ['白色', '黄色'], a: 0 }
+                ]
+            }
+        ],
+        2: [
+            {
+                type: 'number',
+                title: '数字 1-10',
+                questions: [
+                    { q: '1', options: ['Satu', 'Dua'], a: 0 },
+                    { q: '2', options: ['Tiga', 'Dua'], a: 1 },
+                    { q: '3', options: ['Tiga', 'Empat'], a: 0 },
+                    { q: '4', options: ['Lima', 'Empat'], a: 1 },
+                    { q: '5', options: ['Lima', 'Enam'], a: 0 },
+                    { q: '6', options: ['Tujuh', 'Enam'], a: 1 },
+                    { q: '7', options: ['Tujuh', 'Lapan'], a: 0 },
+                    { q: '8', options: ['Sembilan', 'Lapan'], a: 1 },
+                    { q: '9', options: ['Sembilan', 'Sepuluh'], a: 0 },
+                    { q: '10', options: ['Satu', 'Sepuluh'], a: 1 }
+                ]
+            },
+            {
+                type: 'feeling',
+                title: '我的心情',
+                questions: [
+                    { q: '😊', options: ['Gembira', 'Sedih'], a: 0, hint: '开心' },
+                    { q: '😢', options: ['Marah', 'Sedih'], a: 1, hint: '伤心' },
+                    { q: '😡', options: ['Marah', 'Takut'], a: 0, hint: '生气' },
+                    { q: '😨', options: ['Gembira', 'Takut'], a: 1, hint: '害怕' }
+                ]
+            }
+        ],
+        3: [
+            {
+                type: 'family',
+                title: '我的家庭成员',
+                questions: [
+                    { q: '👴', options: ['Datuk', 'Bapa'], a: 0, hint: '祖父' },
+                    { q: '👵', options: ['Nenek', 'Ibu'], a: 0, hint: '祖母' },
+                    { q: '👨', options: ['Bapa', 'Abang'], a: 0, hint: '父亲' },
+                    { q: '👩', options: ['Ibu', 'Kakak'], a: 0, hint: '母亲' },
+                    { q: '👦', options: ['Abang', 'Adik lelaki'], a: 0, hint: '哥哥' },
+                    { q: '👧', options: ['Kakak', 'Adik perempuan'], a: 0, hint: '姐姐' },
+                    { q: '👶♂️', options: ['Adik lelaki', 'Abang'], a: 0, hint: '弟弟' },
+                    { q: '👶♀️', options: ['Adik perempuan', 'Kakak'], a: 0, hint: '妹妹' }
+                ]
+            },
+            {
+                type: 'body',
+                title: '我的身体部位 (二选一)',
+                questions: [
+                    { q: '图中是指什么？(👃)', options: ['Hidung', 'Mata'], a: 0 },
+                    { q: '图中是指什么？(🦷)', options: ['Bibir', 'Gigi'], a: 1 },
+                    { q: '图中是指什么？(👄)', options: ['Mulut', 'Leher'], a: 0 },
+                    { q: '图中是指什么？(🖐️)', options: ['Tangan', 'Kaki'], a: 0 },
+                    { q: '图中是指什么？(🦶)', options: ['Kaki', 'Bahu'], a: 0 },
+                    { q: '图中是指什么？(👀)', options: ['Telinga', 'Mata'], a: 1 },
+                    { q: '图中是指什么？(👂)', options: ['Telinga', 'Dagu'], a: 0 },
+                    { q: '图中是指什么？(💇)', options: ['Rambut', 'Dahi'], a: 0 }
+                ]
+            },
+            {
+                type: 'adj',
+                title: '对比学习',
+                questions: [
+                    { q: '🐘 vs 🐜 (哪个是 Besar?)', options: ['🐘', '🐜'], a: 0, hint: '大' },
+                    { q: '🐜 vs 🐘 (哪个是 Kecil?)', options: ['🐘', '🐜'], a: 1, hint: '小' },
+                    { q: '🦒 vs 🐕 (哪个是 Tinggi?)', options: ['🦒', '🐕'], a: 0, hint: '高' },
+                    { q: '🐕 vs 🦒 (哪个是 Rendah?)', options: ['🦒', '🐕'], a: 1, hint: '矮' },
+                    { q: '📏 vs 📏 (哪个是 Panjang?)', options: ['长尺', '短尺'], a: 0, hint: '长' },
+                    { q: '📏 vs 📏 (哪个是 Pendek?)', options: ['长尺', '短尺'], a: 1, hint: '短' },
+                    { q: '🎅 vs 🏃 (哪个是 Gemuk?)', options: ['🎅', '🏃'], a: 0, hint: '胖' },
+                    { q: '🏃 vs 🎅 (哪个是 Kurus?)', options: ['🎅', '🏃'], a: 1, hint: '瘦' }
+                ]
+            },
+            {
+                type: 'hobby',
+                title: '我的爱好',
+                questions: [
+                    { q: '⚽', options: ['Bermain bola', 'Menanam bunga'], a: 0 },
+                    { q: '🚲', options: ['Menungggang basikal', 'Berjalan-jalan'], a: 0 },
+                    { q: '🚗🧽', options: ['Mencuci kereta', 'Bermain pickleball'], a: 0 },
+                    { q: '🚶', options: ['Berjalan-jalan', 'Bermain bola'], a: 0 },
+                    { q: '🌸', options: ['Menanam bunga', 'Mencuci kereta'], a: 0 },
+                    { q: '🏸', options: ['Bermain pickleball', 'Menungggang basikal'], a: 0 }
+                ]
+            }
+        ],
+        4: [
+            {
+                type: 'classroom',
+                title: '这是什么？(教室物品)',
+                questions: [
+                    { q: '🕒', options: ['Jam', 'Tingkap'], a: 0 },
+                    { q: '🪟', options: ['Tingkap', 'Pintu'], a: 0 },
+                    { q: '⬜', options: ['Papan putih', 'Meja'], a: 0 },
+                    { q: '📌', options: ['Papan notis', 'Komputer'], a: 0 },
+                    { q: '💻', options: ['Komputer', 'Kabinet'], a: 0 },
+                    { q: '🗄️', options: ['Kabinet', 'Rak buku'], a: 0 },
+                    { q: '🗑️', options: ['Bakul sampah', 'Kerusi'], a: 0 },
+                    { q: '🪑', options: ['Kerusi', 'Meja'], a: 0 },
+                    { q: '🚪', options: ['Pintu', 'Tingkap'], a: 0 },
+                    { q: '📚', options: ['Rak buku', 'Papan putih'], a: 0 }
+                ]
+            },
+            {
+                type: 'stationery',
+                title: '文具用品',
+                questions: [
+                    { q: '✏️', options: ['Pensel', 'Pemadam'], a: 0 },
+                    { q: '🧼', options: ['Pemadam', 'Pembaris'], a: 0 },
+                    { q: '📏', options: ['Pembaris', 'Buku teks'], a: 0 },
+                    { q: '📓', options: ['Buku latihan', 'Buku teks'], a: 0 },
+                    { q: '📕', options: ['Buku teks', 'Krayon'], a: 0 },
+                    { q: '🖍️', options: ['Krayon', 'Bekas pensel'], a: 0 },
+                    { q: '👝', options: ['Bekas pensel', 'Pensel'], a: 0 }
+                ]
+            }
+        ]
+    };
+
+    // --- 游戏引擎变量 ---
+    let currentTopic = null;
+    let currentGameIndex = 0;
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let isAudioPlaying = false;
+    let audioCtx = null;
+    let bgmNode = null;
+
+    // --- 界面控制 ---
+    function showMenu() {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-menu').classList.add('active');
+        document.getElementById('header').style.display = 'none';
+    }
+
+    function startTopic(id) {
+        currentTopic = id;
+        currentGameIndex = 0;
+        currentQuestionIndex = 0;
+        score = 0;
+        document.getElementById('score-text').innerText = `分数: ${score}`;
+        document.getElementById('header').style.display = 'flex';
+        loadGame();
+    }
+
+    function loadGame() {
+        const games = gameData[currentTopic];
+        if (currentGameIndex >= games.length) {
+            showResult();
+            return;
+        }
+
+        const game = games[currentGameIndex];
+        currentQuestionIndex = 0;
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-game').classList.add('active');
+        
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const game = gameData[currentTopic][currentGameIndex];
+        const q = game.questions[currentQuestionIndex];
+        const content = document.getElementById('game-content');
+        
+        document.getElementById('progress-text').innerText = `${game.title} (${currentQuestionIndex + 1}/${game.questions.length})`;
+
+        let html = `<h3 class="text-2xl font-bold mb-4 text-center">${game.title}</h3>`;
+        
+        // 渲染题目图片/符号
+        if (game.type === 'color') {
+            html += `<div class="image-box" style="background-color: ${q.color}; width: 200px; height: 100px;"></div>`;
+        } else {
+            html += `<div class="image-box">${q.q}</div>`;
+        }
+
+        if (q.hint) {
+            html += `<p class="text-gray-500 mb-4">(提示: ${q.hint})</p>`;
+        } else {
+            html += `<p class="text-gray-500 mb-4">请选择正确的答案</p>`;
+        }
+
+        html += `<div class="flex flex-col w-full items-center">`;
+        q.options.forEach((opt, idx) => {
+            html += `<div class="quiz-option" onclick="checkAnswer(${idx})">${opt}</div>`;
+        });
+        html += `</div>`;
+
+        content.innerHTML = html;
+    }
+
+    function checkAnswer(idx) {
+        const game = gameData[currentTopic][currentGameIndex];
+        const q = game.questions[currentQuestionIndex];
+        const options = document.querySelectorAll('.quiz-option');
+        
+        if (idx === q.a) {
+            options[idx].classList.add('correct');
+            score += 10;
+            playSound(660, 0.1); // 正确音
+        } else {
+            options[idx].classList.add('wrong');
+            options[q.a].classList.add('correct');
+            playSound(220, 0.2); // 错误音
+        }
+
+        document.getElementById('score-text').innerText = `分数: ${score}`;
+
+        // 锁定点击
+        document.querySelectorAll('.quiz-option').forEach(el => el.onclick = null);
+
+        setTimeout(() => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < game.questions.length) {
+                renderQuestion();
+            } else {
+                currentGameIndex++;
+                loadGame();
+            }
+        }, 1200);
+    }
+
+    function showResult() {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-result').classList.add('active');
+        document.getElementById('header').style.display = 'none';
+        document.getElementById('result-message').innerText = `你完成了单元 ${currentTopic}！总得分：${score}`;
+    }
+
+    // --- 简单的 Web Audio 背景音乐和音效 ---
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    function playSound(freq, duration) {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function toggleMusic() {
+        initAudio();
+        if (isAudioPlaying) {
+            if (bgmNode) bgmNode.stop();
+            isAudioPlaying = false;
+            document.getElementById('music-toggle').innerText = '🔈';
+        } else {
+            playBGM();
+            isAudioPlaying = true;
+            document.getElementById('music-toggle').innerText = '🎵';
+        }
+    }
+
+    function playBGM() {
+        // 创建一个简单的循环旋律
+        const melody = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63];
+        let noteIdx = 0;
+        
+        function nextNote() {
+            if (!isAudioPlaying) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = melody[noteIdx];
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            gain.gain.value = 0.05;
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+            osc.stop(audioCtx.currentTime + 0.5);
+            
+            noteIdx = (noteIdx + 1) % melody.length;
+            setTimeout(nextNote, 500);
+        }
+        nextNote();
+    }
+
+    window.onload = () => {
+        // 初始化
+        console.log("游戏准备就绪");
+    };
+</script>
+
+</body>
+</html>
